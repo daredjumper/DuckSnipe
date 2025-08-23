@@ -9,7 +9,7 @@ os.system('cls')
 availableSnipes = []
 error = False
 
-version = "1.0.4"
+version = "1.0.41"
 
 lower = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
          'w', 'x', 'y', 'z']
@@ -31,7 +31,7 @@ wordlist = ["verified", "public", "sound", "un", "war", "star", "course", "glitc
             "dox", "bin", "ban", "banned", "banish", "banished", "og", "roblox", "swat", "epic", "epik", "sent", "tix",
             "module", "local", "bot", "bucket", "secret", "weapon", "storage", "wish", "wind", "whole", "plays", "forest", "sub", "leave", "pole", "pong", "like", "live", "quant", "count", "let", "fork", "reduce", "bacon", "limited", "unlimited", "fix", "fixed", "broken", "shattered"]
 minerals = ["dirt", "stone", "rock", "sand", "water", "lava", "fire", "copper", "rain", "ruby", "diamond", "sapphire",
-            "gem", "mud", "earth", "air"]
+            "gem", "mud", "earth", "air", "amethyst"]
 rbxstudio = ["model", "mesh", "part", "audio", "tool", "decal", "animation", "collider", "constraint", "controller", "emitter", "keyframe", "material", "node", "physics", "render", "terrain", "texture", "UI", "workspace", "vector", "algorithm", "array", "boolean", "buffer", "class", "compiler", "coroutine", "debug", "enum", "iterator", "method", "namespace", "parameter", "recursive", "stack", "variable"]
 greatname = ["roblox", "hex", "mod", "telamon", "builderman", "tix", "diamond", "epic"]
 joblist = ["artists", "engineer", "worker", "painter", "job", "programmer", "coder", "teacher", "musician", "lawyer", "officer", "legislator"]
