@@ -1,401 +1,461 @@
-import requests
 import random
-from colorama import Fore, Style
 import os
 import time
+import asyncio
+import aiohttp
+import re
+from datetime import datetime
+from time import perf_counter
 
-os.system('cls')
+# ---------------- Constants ---------------- #
+VERSION = "1.0.8"
+WORDLIST = ["verified","public","sound","un","war","star","course","glitch","private","secure",
+"taste","test","taken","build","bought","tower","script","house","sky","building","bank","demo",
+"gun","money","vampire","lua","code","dirt","stone","rock","sand","water","lava","fire","brick",
+"badge","guest","copper","tree","wire","light","thunder","rain","word","blood","duck","snipe",
+"rifle","god","angel","internet","google","guilded","web","hunt","cute","skull","legal","mc",
+"wild","crazy","bin","ban","banned","banish","og","roblox","epic","tix","module","local","bot",
+"secret","weapon","storage","wish","wind","whole","plays","forest","sub","leave"]
 
-availableSnipes = []
-error = False
+MINERALS = ["dirt","stone","rock","sand","water","lava","fire","copper","rain","ruby","diamond"]
+RBXSTUDIO = ["model","mesh","part","audio","tool","decal","animation","collider","constraint",
+"controller","emitter","keyframe","material","node","physics","render","terrain","texture","UI",
+"workspace","vector","algorithm","array","boolean","buffer","class","compiler","coroutine","debug",
+"enum","iterator","method","namespace","parameter","recursive","stack","variable"]
 
-version = "1.0.4"
+GREATNAME = ["roblox","hex","mod","telamon","builderman","tix","diamond","epic"]
+JOBLIST = ["artist","engineer","worker","painter","programmer","coder","teacher","musician","lawyer"]
 
-lower = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-         'w', 'x', 'y', 'z']
-dbl = ['aa', 'bb', 'cc', 'dd', 'ee', 'ff', 'gg', 'hh', 'ii', 'jj', 'kk', 'll', 'mm', 'nn', 'oo', 'pp', 'qq', 'rr', 'ss',
-       'tt', 'uu', 'vv', 'ww', 'xx', 'yy', 'zz']
-special = ['*','@','%','!','.','&','#']
-num = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-all = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-       'w', 'x', 'y', 'z', "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "_"]
-allVariant = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-              'v', 'w', 'x', 'y', 'z', "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-wordlist = ["verified", "public", "sound", "un", "war", "star", "course", "glitch", "glitched", "private", "secure",
-            "taste", "test", "tested", "taken", "build", "bought", "built", "tower", "script", "scripted", "house",
-            "sky", "building", "bank", "special", "demo", "gun", "money", "obvious", "vampire", "wicked", "lua", "code",
-            "object", "dirt", "stone", "rock", "sand", "water", "lava", "fire", "brick", "badge", "guest", "copper",
-            "tree", "tire", "orange", "mouse", "paper", "wire", "cord", "light", "thunder", "rain", "word", "blood",
-            "duck", "ducky", "snipe", "rifle", "god", "angel", "ground", "grass", "internet", "social", "socially",
-            "google", "guilded", "web", "hunt", "cute", "skull", "legal", "legally", "mc", "legal", "wild", "crazy",
-            "dox", "bin", "ban", "banned", "banish", "banished", "og", "roblox", "swat", "epic", "epik", "sent", "tix",
-            "module", "local", "bot", "bucket", "secret", "weapon", "storage", "wish", "wind", "whole", "plays", "forest", "sub", "leave", "pole", "pong", "like", "live", "quant", "count", "let", "fork", "reduce", "bacon", "limited", "unlimited", "fix", "fixed", "broken", "shattered"]
-minerals = ["dirt", "stone", "rock", "sand", "water", "lava", "fire", "copper", "rain", "ruby", "diamond", "sapphire",
-            "gem", "mud", "earth", "air"]
-rbxstudio = ["model", "mesh", "part", "audio", "tool", "decal", "animation", "collider", "constraint", "controller", "emitter", "keyframe", "material", "node", "physics", "render", "terrain", "texture", "UI", "workspace", "vector", "algorithm", "array", "boolean", "buffer", "class", "compiler", "coroutine", "debug", "enum", "iterator", "method", "namespace", "parameter", "recursive", "stack", "variable"]
-greatname = ["roblox", "hex", "mod", "telamon", "builderman", "tix", "diamond", "epic"]
-joblist = ["artists", "engineer", "worker", "painter", "job", "programmer", "coder", "teacher", "musician", "lawyer", "officer", "legislator"]
-colors = [Fore.RED, Fore.GREEN, Fore.CYAN, Fore.YELLOW]
-custom = [""]
+AVAILABLE_SNIPES = []
+CUSTOM_WORDS = []
 
-def syncWords():
-    global custom
+LOG_FOLDER = "DuckSnipeLogs"
+USERS_FILE = "users.txt"
+WORDS_FILE = "words.txt"
+
+# ---------------- Initialization ---------------- #
+os.makedirs(LOG_FOLDER, exist_ok=True)
+
+# ---------------- Utility ---------------- #
+def clear_screen():
+    """Clear terminal screen"""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def sync_custom_words():
+    """Load custom words from file"""
+    global CUSTOM_WORDS
     try:
-        f = open("words.txt", "r")
-        customwords = f.read()
-        x = customwords.split(",")
-        x.remove('')
-        custom = x
-    except:
-        pass
+        with open(WORDS_FILE, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            CUSTOM_WORDS = [w.strip() for w in content.split(",") if w.strip()]
+    except FileNotFoundError:
+        CUSTOM_WORDS = []
+        # Create empty file
+        with open(WORDS_FILE, "w", encoding="utf-8") as f:
+            pass
 
-def validate_username(username):
+def log_message(command_name, text):
+    """Strip ANSI color codes and append to log file"""
+    plain = re.sub(r'\x1B\[[0-?]*[ -/]*[@-~]', '', text)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    path = os.path.join(LOG_FOLDER, f"{command_name}_output.txt")
+    
+    try:
+        with open(path, "a", encoding="utf-8") as f:
+            f.write(f"[{timestamp}] {plain}\n")
+    except Exception as e:
+        print(f"Warning: Could not write to log: {e}")
+
+def safe_file_write(filepath, content, mode="a"):
+    """Safely write to file with error handling"""
+    try:
+        with open(filepath, mode, encoding="utf-8") as f:
+            f.write(content)
+        return True
+    except Exception as e:
+        print(f"Error writing to {filepath}: {e}")
+        return False
+
+def safe_file_read(filepath):
+    """Safely read from file with error handling"""
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        return None
+    except Exception as e:
+        print(f"Error reading {filepath}: {e}")
+        return None
+
+# ---------------- Async API ---------------- #
+async def validate_username(session, username, log_name="username_check"):
+    """Check if a username is available on Roblox"""
     url = f"https://auth.roblox.com/v1/usernames/validate?birthday=2006-09-21T07:00:00.000Z&context=Signup&username={username}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        if data['code'] == 0:
-            print(f"{Fore.GREEN}" + username + f" is available for use.{Style.RESET_ALL}")
-            availableSnipes.append(username)
-        elif data['code'] == 1:
-            print(f"{Fore.RED}" + username + f" is taken.{Style.RESET_ALL}")
-        elif data['code'] == 2:
-            print(f"{Fore.RED}" + username + f" is not appropriate for roblox.{Style.RESET_ALL}")
-        elif data['code'] == 10:
-            print(username + " may contain private information.")
+    
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            data = await resp.json()
+            code = data.get('code', -1)
+            
+            messages = {
+                0: f"✓ {username} is available!",
+                1: f"✗ {username} is taken.",
+                2: f"✗ {username} is inappropriate.",
+                10: f"✗ {username} may contain private info."
+            }
+            
+            message = messages.get(code, f"? {username} returned unknown code: {code}")
+            print(message)
+            log_message(log_name, message)
+            
+            if code == 0:
+                AVAILABLE_SNIPES.append(username)
+                
+    except asyncio.TimeoutError:
+        msg = f"⚠ Timeout checking {username}"
+        print(msg)
+        log_message(log_name, msg)
+    except Exception as e:
+        msg = f"⚠ Error checking {username}: {e}"
+        print(msg)
+        log_message(log_name, msg)
+
+async def validate_usernames_concurrent(usernames, log_name="username_check"):
+    """Validate multiple usernames concurrently"""
+    if not usernames:
+        print("No usernames to check!")
+        return
+    
+    print(f"Checking {len(usernames)} usernames...\n")
+    
+    async with aiohttp.ClientSession() as session:
+        tasks = [validate_username(session, u, log_name) for u in usernames]
+        await asyncio.gather(*tasks)
+    
+    if AVAILABLE_SNIPES:
+        print(f"\n✓ Found {len(AVAILABLE_SNIPES)} available usernames!")
     else:
-        print("Unable to access Roblox API")
+        print("\n✗ No available usernames found.")
 
+# ---------------- Commands ---------------- #
+def add_word(word):
+    """Add a custom word to the wordlist"""
+    start_time = perf_counter()
+    
+    word = word.strip()
+    
+    if not word:
+        print("Error: Word cannot be empty!")
+        return
+    
+    if word in CUSTOM_WORDS:
+        print(f"'{word}' is already in custom words!")
+        return
+    
+    # Append with comma
+    if safe_file_write(WORDS_FILE, f"{word},"):
+        sync_custom_words()
+        msg = f"✓ Added word '{word}' to custom wordlist"
+        print(msg)
+        log_message("addword", msg)
+        
+        elapsed = (perf_counter() - start_time) * 1000
+        log_message("addword", f"Command completed in {elapsed:.2f}ms")
+    else:
+        print("✗ Failed to add word")
 
-# on start
+def generate_pass(username):
+    """Generate a random password for a username"""
+    start_time = perf_counter()
+    
+    username = username.strip()
+    
+    if not username:
+        print("Error: Username cannot be empty!")
+        return
+    
+    generated = f"{username}-{random.choice(WORDLIST)}-{random.randint(100,999)}*"
+    
+    if safe_file_write(USERS_FILE, f"{username} : {generated}\n"):
+        msg = f"✓ Generated password: {generated}"
+        print(msg)
+        log_message("pass", msg)
+        
+        elapsed = (perf_counter() - start_time) * 1000
+        log_message("pass", f"Command completed in {elapsed:.2f}ms")
+    else:
+        print("✗ Failed to save password")
 
-def onstart():
-    global error
-    error = False
-    syncWords()
-    randomColor = random.choice(colors)
-    print(" ")
-    print(f"{randomColor} [ DuckSnipe - {version} ]{Style.RESET_ALL}")
-    print(" ")
-    print(" do cmds for all roblox name snipe commands.")
-    print(" ")
-    cmd = input(f"{randomColor}==> {Style.RESET_ALL}")
-    print(" ")
+def add_account(username, password):
+    """Manually add an account to storage"""
+    start_time = perf_counter()
+    
+    username = username.strip()
+    password = password.strip()
+    
+    if not username or not password:
+        print("Error: Username and password cannot be empty!")
+        return
+    
+    if safe_file_write(USERS_FILE, f"{username} : {password}\n"):
+        msg = f"✓ Added account '{username}'"
+        print(msg)
+        log_message("addacc", msg)
+        
+        elapsed = (perf_counter() - start_time) * 1000
+        log_message("addacc", f"Command completed in {elapsed:.2f}ms")
+    else:
+        print("✗ Failed to add account")
 
-    splitcmd = cmd.split(" ")
+def show_storage():
+    """Display all saved accounts"""
+    content = safe_file_read(USERS_FILE)
+    
+    if content is None or not content.strip():
+        print("No saved accounts found.")
+    else:
+        print("=== Saved Accounts ===\n")
+        print(content)
 
-    # commands
-    if cmd == "cmds":
-        print("[ Commands ]")
-        print(" ")
-        print("gens [gen/key] - Get all working generators.")
-        print("gen [type] [att] - Generate Untaken Names.")
-        print("genkey [type] [key] - Generate Untaken Names with a keyword.")
-        print("check [name] - Check Name for availability.")
-        print("pass [name] - Generates & saves a password for an account.")
-        print("addacc [username] [password] - Saves account to snipe storage.")
-        print("storage - Shows all your saved users.")
-        print("")
-        print("[ Terms ]")
-        print(" ")
-        print("# - replaced with a number")
-        print("* - replaced with a letter")
-        print("")
-        input("Press Enter to go back. ")
-        os.system('cls')
-        onstart()
-    if splitcmd[0] == "gens":
+def show_commands():
+    """Display all available commands"""
+    print("""
+=== DuckSnipe Commands ===
+
+genkey [type] [key]     - Generate & check usernames
+                          Types: wordlist, studio, minerals, custom, great, jobs
+                          
+check [username]        - Check if a username is available
+
+addword [word]          - Add a custom word to your wordlist
+
+pass [username]         - Generate a random password for username
+
+addacc [user] [pass]    - Manually save an account
+
+storage                 - Show all saved accounts
+
+cmds                    - Show this command list
+
+help                    - Show detailed help guide
+
+clear                   - Clear available snipes list
+
+exit/quit               - Exit DuckSnipe
+
+========================
+""")
+
+def show_help():
+    """Display detailed help information"""
+    print(f"""
+╔═══════════════════════════════════════╗
+║       DuckSnipe v{VERSION} - Help       ║
+╚═══════════════════════════════════════╝
+
+COMMANDS:
+---------
+genkey [type] [key]
+  Generate username combinations and check availability
+  
+  Types available:
+    - wordlist  : Common words
+    - studio    : Roblox Studio terms
+    - minerals  : Mineral/element names
+    - custom    : Your custom words (add with 'addword')
+    - great     : Premium Roblox-related words
+    - jobs      : Job/profession names
+  
+  Example: genkey wordlist Pro
+           (checks: Proverified, verifiedPro, Propublic, etc.)
+
+check [username1] [username2] ...
+  Check specific usernames for availability
+  
+  Example: check CoolDude123 EpicGamer456
+
+addword [word]
+  Add a word to your custom wordlist
+  
+  Example: addword ninja
+
+pass [username]
+  Generate and save a random password
+  
+  Example: pass CoolDude123
+
+addacc [username] [password]
+  Manually save account credentials
+  
+  Example: addacc CoolDude123 MyPassword123
+
+storage
+  View all saved account credentials
+
+clear
+  Clear the list of available snipes found in current session
+
+FEATURES:
+---------
+• Concurrent username checking (fast!)
+• Automatic logging to {LOG_FOLDER}/
+• Password generation
+• Custom wordlist support
+• Account storage
+
+Press Enter to continue...
+""")
+    input()
+
+def clear_snipes():
+    """Clear the available snipes list"""
+    global AVAILABLE_SNIPES
+    count = len(AVAILABLE_SNIPES)
+    AVAILABLE_SNIPES = []
+    print(f"✓ Cleared {count} available snipes from memory")
+
+# ---------------- Command Handlers ---------------- #
+async def handle_genkey(args):
+    """Handle genkey command"""
+    start_time = perf_counter()
+    
+    if len(args) < 2:
+        print("Error: Missing arguments!")
+        print("Usage: genkey [type] [key]")
+        print("Types: wordlist, studio, minerals, custom, great, jobs")
+        return
+    
+    key_type, key_val = args[0].lower(), args[1]
+    
+    sources = {
+        "wordlist": WORDLIST,
+        "studio": RBXSTUDIO,
+        "minerals": MINERALS,
+        "custom": CUSTOM_WORDS,
+        "great": GREATNAME,
+        "jobs": JOBLIST
+    }
+    
+    if key_type not in sources:
+        print(f"Error: Unknown type '{key_type}'")
+        print(f"Available types: {', '.join(sources.keys())}")
+        return
+    
+    source = sources[key_type]
+    
+    if not source:
+        print(f"Error: '{key_type}' wordlist is empty!")
+        if key_type == "custom":
+            print("Add words with: addword [word]")
+        return
+    
+    usernames = []
+    for word in source:
+        usernames.append(f"{key_val}{word}")
+        usernames.append(f"{word}{key_val}")
+    
+    msg = f"Generated {len(usernames)} usernames from '{key_type}' with key '{key_val}'"
+    print(msg)
+    log_message("genkey", msg)
+    
+    await validate_usernames_concurrent(usernames, "genkey")
+    
+    elapsed = (perf_counter() - start_time) * 1000
+    log_message("genkey", f"Command completed in {elapsed:.2f}ms")
+
+async def handle_check(args):
+    """Handle check command"""
+    start_time = perf_counter()
+    
+    if not args:
+        print("Error: No usernames provided!")
+        print("Usage: check [username1] [username2] ...")
+        return
+    
+    await validate_usernames_concurrent(args, "check")
+    
+    elapsed = (perf_counter() - start_time) * 1000
+    log_message("check", f"Command completed in {elapsed:.2f}ms")
+
+# ---------------- Main Loop ---------------- #
+def main():
+    """Main application loop"""
+    sync_custom_words()
+    
+    print(f"""
+╔═══════════════════════════════════════╗
+║     DuckSnipe v{VERSION} Started      ║
+╚═══════════════════════════════════════╝
+
+Type 'help' for guide or 'cmds' for command list
+""")
+    
+    while True:
         try:
-            if splitcmd[1] == "gen":
-                print("[ Regular Gen ]")
-                print(" ")
-                print("4l [attempts] - Generates 4 letters.")
-                print("4char [attempts] - Generates 4 chars.")
-                print("5l [attempts] - Generates 5 letters.")
-                print("5char [attempts] - Generates 5 chars.")
-                print("6l [attempts] - Generates 6 letters.")
-                print("6char [attempts] - Generates 6 chars.")
-                print("")
-                input("Press Enter to go back. ")
-                os.system('cls')
-                onstart()
-            if splitcmd[1] == "key":
-                print("[ GenKey ]")
-                print(" ")
-                print("##key [key] - Generates 2 digits BEFORE the key 10-100")
-                print("key## [key] - Generates 2 digits AFTER the key 10-100")
-                print("#key [key] - Generates 1 num BEFORE the key 0-9")
-                print("key# [key] - Generates 1 num AFTER the key 0-9")
-                print("wordlist [key] - Generates names with wordlist and your key.")
-                print("wordlist_ [key] - Generates names with wordlist and your key but with an _")
-                print("studio [key] - Generates names with roblox studio terms and your key.")
-                print("studio_ [key] - Generates names with roblox studio terms and your key but with an _")
-                print("jobs [key] - Generates names with jobs and your key.")
-                print("jobs_ [key] - Generates names with jobs and your key but with an _")
-                print("minerals [key] - Generates names with minerals and your key.")
-                print("custom [key] - Generates names with your custom wordlist and your key.")
-                print("great [key] - Generates names with well-known keywords and your key.")
-                print("key** - Generates 2 letters after the key. (ex: keyAA)")
-                print("key* - Generates a letter after the key. (ex: keyA)")
-                print("*_key - Generates a letter before the key but with an _ (ex: A_key)")
-                print("#_key - Generates 1 num before the key 0-9 but with an _ (ex: 0_key)")
-                print("")
-                input("Press Enter to go back. ")
-                os.system('cls')
-                onstart()
-        except IndexError:
-            error = True
-            print(f"{Fore.RED} Something went wrong. Did you forget to add an argument?{Style.RESET_ALL}")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-
-    if splitcmd[0] == "genkey":
-        try:
-            if splitcmd[1] == "wordlist":
-                for i in wordlist:
-                    validate_username(splitcmd[2] + i)
-                for i in wordlist:
-                    validate_username(i + splitcmd[2])
-            if splitcmd[1] == "wordlist_":
-                for i in wordlist:
-                    validate_username(splitcmd[2] + "_" + i)
-                for i in wordlist:
-                    validate_username(i + "_" + splitcmd[2])
-            if splitcmd[1] == "studio":
-                for i in rbxstudio:
-                    validate_username(splitcmd[2] + i)
-                for i in rbxstudio:
-                    validate_username(i + splitcmd[2])
-            if splitcmd[1] == "studio_":
-                for i in rbxstudio:
-                    validate_username(splitcmd[2] + "_" + i)
-                for i in rbxstudio:
-                    validate_username(i + "_" + splitcmd[2])
-            if splitcmd[1] == "minerals":
-                for i in minerals:
-                    validate_username(splitcmd[2] + i)
-                for i in minerals:
-                    validate_username(i + splitcmd[2])
-            if splitcmd[1] == "custom":
-                for i in custom:
-                    validate_username(splitcmd[2] + i)
-                for i in custom:
-                    validate_username(i + splitcmd[2])
-            if splitcmd[1] == "great":
-                for i in greatname:
-                    validate_username(splitcmd[2] + i)
-                for i in greatname:
-                    validate_username(i + splitcmd[2])
-            if splitcmd[1] == "jobs":
-                for i in joblist:
-                    validate_username(splitcmd[2] + i)
-                for i in joblist:
-                    validate_username(i + splitcmd[2])
-            if splitcmd[1] == "jobs_":
-                for i in joblist:
-                    validate_username(splitcmd[2] + "_" + i)
-                for i in joblist:
-                    validate_username(i + "_" + splitcmd[2])
-            if splitcmd[1] == "##key":
-                for a in range(10, 100):
-                    validate_username(str(a) + splitcmd[2])
-            if splitcmd[1] == "key##":
-                for a in range(10, 100):
-                    validate_username(splitcmd[2] + str(a))
-            if splitcmd[1] == "#key":
-                for a in range(0, 10):
-                    validate_username(str(a) + splitcmd[2])
-            if splitcmd[2] == "key#":
-                for a in range(0, 10):
-                    validate_username(splitcmd[2] + str(a))
-            if splitcmd[1] == "#_key":
-                for a in range(0, 10):
-                    validate_username(str(a) + "_" + splitcmd[2])
-                for a in range(0, 10):
-                    validate_username(splitcmd[2] + "_" + str(a))
-            if splitcmd[1] == "*_key":
-                for a in lower:
-                    validate_username(str(a) + "_" + splitcmd[2])
-                for a in lower:
-                    validate_username(splitcmd[2] + "_" + str(a))
-            if splitcmd[1] == "key*":
-                for i in lower:
-                    validate_username(splitcmd[2] + i)
-                for i in lower:
-                    validate_username(i + splitcmd[2])
-            if splitcmd[1] == "key**":
-                for i in dbl:
-                    validate_username(splitcmd[2] + i)
-                for i in dbl:
-                    validate_username(i + splitcmd[2])
-        except IndexError:
-            error = True
-            print(f"{Fore.RED} Something went wrong. Did you forget to add an argument?{Style.RESET_ALL}")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-
-    if cmd == "storage":
-        try:
-            print("")
-            print(f"{Fore.CYAN}[ Your saved users ]{Style.RESET_ALL}")
-            print("")
-            f = open("users.txt", "r")
-            print(f.read())
-        except FileNotFoundError:
-            print("")
-            print(f"{Fore.RED}No saved users found.{Style.RESET_ALL}")
-        print("")
-        input("Press Enter to go back.")
-        os.system('cls')
-        onstart()
-
-    if splitcmd[0] == "addword":
-        try:
-            with open('words.txt', 'a') as file:
-                file.write(splitcmd[1] + ",")
-            print("")
-            print(f"{Fore.CYAN}[ Saved word: {splitcmd[1]} to wordlist! ]{Style.RESET_ALL}")
-            print("")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-        except IndexError:
-            error = True
-            print(f"{Fore.RED} Something went wrong. Did you forget to add an argument?{Style.RESET_ALL}")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-
-    if splitcmd[0] == "gen":
-        try:
-            if splitcmd[1] == "4l":
-                for a in range(int(splitcmd[2])):
-                    validate_username(
-                        random.choice(lower) + random.choice(lower) + random.choice(lower) + random.choice(lower))
-            if splitcmd[1] == "4char":
-                for a in range(int(splitcmd[2])):
-                    validate_username(
-                        random.choice(allVariant) + random.choice(all) + random.choice(all) + random.choice(allVariant))
-            if splitcmd[1] == "5char":
-                for a in range(int(splitcmd[2])):
-                    validate_username(random.choice(allVariant) + random.choice(all) + random.choice(all) + random.choice(
-                        all) + random.choice(allVariant))
-            if splitcmd[1] == "5l":
-                for a in range(int(splitcmd[2])):
-                    validate_username(random.choice(lower) + random.choice(lower) + random.choice(lower) + random.choice(
-                        lower) + random.choice(lower))
-            if splitcmd[1] == "6l":
-                for a in range(int(splitcmd[2])):
-                    validate_username(random.choice(lower) + random.choice(lower) + random.choice(lower) + random.choice(
-                        lower) + random.choice(lower) + random.choice(lower))
-            if splitcmd[1] == "6char":
-                for a in range(int(splitcmd[2])):
-                    validate_username(random.choice(allVariant) + random.choice(all) + random.choice(all) + random.choice(
-                        all) + random.choice(all) + random.choice(allVariant))
-        except IndexError:
-            error = True
-            print(f"{Fore.RED} Something went wrong. Did you forget to add an argument?{Style.RESET_ALL}")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-
-    if splitcmd[0] == "check":
-        try:
-            validate_username(splitcmd[1])
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-        except IndexError:
-            print(f"{Fore.RED} Enter a valid username.{Style.RESET_ALL}")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-    if splitcmd[0] == "pass":
-        try:
-            generatedpass = ""
-            chance = random.randint(1, 2)
-            if chance == 1:
-                thing = splitcmd[1] + "-"
-                randomword = random.choice(wordlist) + "-"
-                randomnum = str(random.randint(100, 1000))
-                randomspecial = random.choice(special)
-                generatedpass = thing + randomword + randomnum + randomspecial
-            else:
-                thing = splitcmd[1] + "-"
-                randomword = random.choice(wordlist) + "-"
-                randomnum = str(random.randint(100, 1000))
-                randomspecial = random.choice(special)
-                generatedpass = randomword + thing + randomnum + randomspecial
-            with open('users.txt', 'a') as file:
-                file.write(splitcmd[1] + " : " + generatedpass + "\n")
-            print(" ")
-            print(f"{Fore.YELLOW}Generated Password:{Style.RESET_ALL}")
-            print(f"{Fore.GREEN}{generatedpass}{Style.RESET_ALL}")
-            print("")
-            print(f"{Fore.CYAN}[ Saved Username & Password to file! ]{Style.RESET_ALL}")
-            print("")
-            input("Press Enter to go back.")
-            os.system('cls')
-            onstart()
-        except IndexError:
-            print(f"{Fore.RED} Enter a valid username.{Style.RESET_ALL}")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-
-    if splitcmd[0] == "addacc":
-        try:
-            with open('users.txt', 'a') as file:
-                file.write(splitcmd[1] + " : " + splitcmd[2] + "\n")
-            print(" ")
-            print(f"{Fore.GREEN}[ Added account '{splitcmd[1]}' to snipe storage! ]{Style.RESET_ALL}")
-            print("")
-            print(f"{Fore.YELLOW}-=- Info -=-{Style.RESET_ALL}")
-            print(f"Username: {splitcmd[1]}")
-            print(f"Password: {splitcmd[2]}")
-            print("")
-            input("Press Enter to go back.")
-            os.system('cls')
-            onstart()
-        except IndexError:
-            print(f"{Fore.RED} Something went wrong. Did you forget an argument?{Style.RESET_ALL}")
-            time.sleep(3)
-            os.system('cls')
-            onstart()
-
-    nocommand = ["check", "cmds", "pass"]
-    yescommand = ["gen", "gens", "genkey"]
-    if not splitcmd[0] in nocommand:
-        if availableSnipes:
-            print(" ")
-            print(f"{Fore.BLUE} [ Store available users in file? ]{Style.RESET_ALL}")
-            choice = input("(y/n): ")
-            if choice == "y":
-                with open('valid.txt', 'a') as file:
-                    for a in availableSnipes:
-                        file.write(a + '\n')
-                    file.write("\n")
-            availableSnipes.clear()
-            os.system('cls')
-            onstart()
-        else:
-            if not error:
-                if splitcmd[0] in yescommand:
-                    print(" ")
-                    print(f"All generated users are {Fore.RED}taken{Style.RESET_ALL} :[")
-                    time.sleep(2.5)
-                    availableSnipes.clear()
-                    os.system('cls')
-                    onstart()
+            cmd_input = input("\n==> ").strip()
+            
+            if not cmd_input:
+                continue
+            
+            parts = cmd_input.split()
+            cmd = parts[0].lower()
+            args = parts[1:]
+            
+            # Handle exit commands
+            if cmd in ["exit", "quit"]:
+                print("Thanks for using DuckSnipe! Goodbye.")
+                break
+            
+            # Handle sync commands
+            elif cmd == "cmds":
+                show_commands()
+                
+            elif cmd == "help":
+                show_help()
+                
+            elif cmd == "addword":
+                if args:
+                    add_word(args[0])
                 else:
-                    print(" ")
-                    print(f"{Fore.RED}Unknown command:{Style.RESET_ALL} {splitcmd[0]}")
-                    time.sleep(1)
-                    availableSnipes.clear()
-                    os.system('cls')
-                    onstart()
+                    print("Usage: addword [word]")
+                    
+            elif cmd == "pass":
+                if args:
+                    generate_pass(args[0])
+                else:
+                    print("Usage: pass [username]")
+                    
+            elif cmd == "addacc":
+                if len(args) >= 2:
+                    add_account(args[0], args[1])
+                else:
+                    print("Usage: addacc [username] [password]")
+                    
+            elif cmd == "storage":
+                show_storage()
+                input("\nPress Enter to continue...")
+                
+            elif cmd == "clear":
+                clear_snipes()
+            
+            # Handle async commands
+            elif cmd == "genkey":
+                asyncio.run(handle_genkey(args))
+                input("\nPress Enter to continue...")
+                
+            elif cmd == "check":
+                asyncio.run(handle_check(args))
+                input("\nPress Enter to continue...")
+                
+            else:
+                print(f"Unknown command: '{cmd}'")
+                print("Type 'help' for assistance or 'cmds' for command list")
+        
+        except KeyboardInterrupt:
+            print("\n\nInterrupted. Type 'exit' to quit.")
+        except Exception as e:
+            print(f"Error: {e}")
+            log_message("error", f"Unexpected error: {e}")
 
 if __name__ == "__main__":
-    onstart()
+    main()
