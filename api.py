@@ -8,6 +8,10 @@ import aiohttp
 from config import AVAILABLE_SNIPES
 from utils import log_message
 
+# Rate limiting configuration
+MAX_CONCURRENT_REQUESTS = 25  # Maximum concurrent requests
+REQUEST_DELAY = 0.5  # Delay between batches in seconds
+
 async def validate_username(session, username, log_name="username_check"):
     """Check if a username is available on Roblox"""
     url = f"https://auth.roblox.com/v1/usernames/validate?birthday=2006-09-21T07:00:00.000Z&context=Signup&username={username}"
@@ -41,15 +45,23 @@ async def validate_username(session, username, log_name="username_check"):
         log_message(log_name, msg)
 
 async def validate_usernames_concurrent(usernames, log_name="username_check"):
-    """Validate multiple usernames concurrently"""
+    """Validate multiple usernames concurrently with rate limiting"""
     if not usernames:
         print("No usernames to check!")
         return
     
     print(f"Checking {len(usernames)} usernames...\n")
     
+    # Create semaphore to limit concurrent requests
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
+    
+    async def validate_with_semaphore(session, username):
+        async with semaphore:
+            await validate_username(session, username, log_name)
+            await asyncio.sleep(REQUEST_DELAY)  # Add delay between requests
+    
     async with aiohttp.ClientSession() as session:
-        tasks = [validate_username(session, u, log_name) for u in usernames]
+        tasks = [validate_with_semaphore(session, u) for u in usernames]
         await asyncio.gather(*tasks)
     
     if AVAILABLE_SNIPES:

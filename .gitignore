@@ -3,3 +3,4 @@ DuckSnipeLogs
 .python-version
 pyproject.toml
 __pycache__
+uv.lock

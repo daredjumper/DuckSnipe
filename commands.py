@@ -7,7 +7,8 @@ import random
 import asyncio
 from time import perf_counter
 from config import (VERSION, WORDLIST, RBXSTUDIO, MINERALS, GREATNAME, JOBLIST,
-                    CUSTOM_WORDS, AVAILABLE_SNIPES, USERS_FILE, WORDS_FILE, LOG_FOLDER)
+                    CUSTOM_WORDS, AVAILABLE_SNIPES, USERS_FILE, WORDS_FILE, 
+                    LOG_FOLDER, AVAILABLE_FILE)
 from utils import safe_file_write, safe_file_read, log_message, sync_custom_words
 from api import validate_usernames_concurrent
 
@@ -89,6 +90,18 @@ def show_storage():
         print("=== Saved Accounts ===\n")
         print(content)
 
+def show_available():
+    """Display all available usernames found"""
+    content = safe_file_read(AVAILABLE_FILE)
+    
+    if content is None or not content.strip():
+        print("No available usernames found yet.")
+        print(f"Run 'genkey' or 'check' commands to find available usernames.")
+    else:
+        print("=== Available Usernames ===\n")
+        print(content)
+        print(f"\nTotal found: {len(content.strip().split(chr(10)))}")
+
 def show_commands():
     """Display all available commands"""
     print("""
@@ -98,6 +111,8 @@ genkey [type] [key]     - Generate & check usernames
                           Types: wordlist, studio, minerals, custom, great, jobs
                           
 check [username]        - Check if a username is available
+
+available               - View all available usernames found
 
 addword [word]          - Add a custom word to your wordlist
 
@@ -111,7 +126,7 @@ cmds                    - Show this command list
 
 help                    - Show detailed help guide
 
-clear                   - Clear available snipes list
+clear                   - Clear available snipes list (in memory only)
 
 exit/quit               - Exit DuckSnipe
 
@@ -146,6 +161,10 @@ check [username1] [username2] ...
   
   Example: check CoolDude123 EpicGamer456
 
+available
+  View all available usernames found
+  These are automatically saved to {AVAILABLE_FILE}
+
 addword [word]
   Add a word to your custom wordlist
   
@@ -165,12 +184,14 @@ storage
   View all saved account credentials
 
 clear
-  Clear the list of available snipes found in current session
+  Clear the list of available snipes from memory
+  (does not delete from {AVAILABLE_FILE})
 
 FEATURES:
 ---------
 • Concurrent username checking (fast!)
 • Automatic logging to {LOG_FOLDER}/
+• Available usernames saved to {AVAILABLE_FILE}
 • Password generation
 • Custom wordlist support
 • Account storage
@@ -184,6 +205,7 @@ def clear_snipes():
     count = len(AVAILABLE_SNIPES)
     AVAILABLE_SNIPES.clear()
     print(f"✓ Cleared {count} available snipes from memory")
+    print(f"Note: {AVAILABLE_FILE} is not affected")
 
 async def handle_genkey(args):
     """Handle genkey command"""

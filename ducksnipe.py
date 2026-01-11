@@ -8,7 +8,7 @@ import asyncio
 from config import VERSION, LOG_FOLDER
 from utils import sync_custom_words, log_message
 from commands import (add_word, generate_pass, add_account, show_storage,
-                      show_commands, show_help, clear_snipes, 
+                      show_commands, show_help, clear_snipes, show_available,
                       handle_genkey, handle_check)
 
 def initialize():
@@ -50,6 +50,10 @@ Type 'help' for guide or 'cmds' for command list
                 
             elif cmd == "help":
                 show_help()
+                
+            elif cmd == "available":
+                show_available()
+                input("\nPress Enter to continue...")
                 
             elif cmd == "addword":
                 if args:
@@ -96,5 +100,4 @@ Type 'help' for guide or 'cmds' for command list
             log_message("error", f"Unexpected error: {e}")
 
 if __name__ == "__main__":
-    
     main()
