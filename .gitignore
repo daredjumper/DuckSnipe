@@ -1,3 +1,8 @@
 words.txt
-venv
+.venv
 DuckSnipeLogs
+__pycache__
+pyproject.toml
+uv.lock
+words.txt
+.python-version

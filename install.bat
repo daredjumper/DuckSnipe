@@ -1,9 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
-
 echo ========================================
-echo    DuckSnipe v1.0.8 - Auto Installer
+echo    DuckSnipe v1.0.9 - Auto Installer
 echo ========================================
 echo.
 
@@ -76,7 +75,9 @@ echo.
 :: Install dependencies
 echo [5/5] Installing required dependencies...
 echo.
-echo Installing: aiohttp
+
+:: Install aiohttp
+echo Installing: aiohttp (async HTTP client)
 python -m pip install aiohttp --quiet
 if errorlevel 1 (
     echo [ERROR] Failed to install aiohttp!
@@ -84,6 +85,9 @@ if errorlevel 1 (
     exit /b 1
 )
 echo [OK] aiohttp installed.
+
+:: Install colorama
+echo Installing: colorama (colored terminal output)
 python -m pip install colorama --quiet
 if errorlevel 1 (
     echo [ERROR] Failed to install colorama!
@@ -98,7 +102,10 @@ echo    Installation Complete!
 echo ========================================
 echo.
 echo Virtual environment created: venv\
-echo Dependencies installed: aiohttp
+echo.
+echo Dependencies installed:
+echo   - aiohttp  (async HTTP requests)
+echo   - colorama (colored terminal output)
 echo.
 echo To run DuckSnipe:
 echo   1. Run: start.bat

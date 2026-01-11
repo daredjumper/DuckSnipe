@@ -3,7 +3,7 @@ DuckSnipe Configuration
 Contains all constants and wordlists
 """
 
-VERSION = "1.0.8"
+VERSION = "1.0.9"
 
 # Wordlists
 WORDLIST = [
@@ -48,11 +48,17 @@ GREATNAME = ["roblox","hex","mod","telamon","builderman","tix","diamond","epic"]
 
 JOBLIST = ["artist","engineer","worker","painter","programmer","coder","teacher","musician","lawyer"]
 
-# File paths
+# File paths (can be modified via settings command)
 LOG_FOLDER = "DuckSnipeLogs"
 USERS_FILE = "users.txt"
 WORDS_FILE = "words.txt"
-AVAILABLE_FILE = "available_usernames.txt"  # New file for available usernames
+AVAILABLE_FILE = "available_usernames.txt"
+SETTINGS_FILE = "settings.json"
+
+# API Settings (can be modified via settings command)
+# These defaults are safe to prevent rate limiting
+MAX_CONCURRENT_REQUESTS = 10  # Lower = safer (10 requests at once)
+REQUEST_DELAY = 0.3  # Wait 0.3 seconds between requests
 
 # Global state
 AVAILABLE_SNIPES = []
