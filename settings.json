@@ -1,0 +1,8 @@
+{
+    "log_folder": "DuckSnipeLogs",
+    "users_file": "users.txt",
+    "words_file": "words.txt",
+    "available_file": "available_usernames.txt",
+    "max_concurrent_requests": 10,
+    "request_delay": 0.3
+}

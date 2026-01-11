@@ -13,13 +13,13 @@ from commands import (add_word, generate_pass, add_account, show_storage,
                       handle_genkey, handle_check, handle_letter_gen,
                       show_settings, modify_settings)
 
-# Initialize colorama
+
 init(autoreset=True)
 
 def initialize():
     """Initialize application"""
     os.makedirs(config.LOG_FOLDER, exist_ok=True)
-    load_settings()  # Load settings from file
+    load_settings()  
     sync_custom_words()
 
 def main():
@@ -45,12 +45,12 @@ def main():
             cmd = parts[0].lower()
             args = parts[1:]
             
-            # Exit commands
+            
             if cmd in ["exit", "quit"]:
                 print(f"{Fore.YELLOW}Thanks for using DuckSnipe! Goodbye.{Style.RESET_ALL}")
                 break
             
-            # Synchronous commands
+            
             elif cmd == "cmds":
                 show_commands()
                 
@@ -90,7 +90,7 @@ def main():
             elif cmd == "clear":
                 clear_snipes()
             
-            # Asynchronous commands
+            
             elif cmd == "genkey":
                 asyncio.run(handle_genkey(args))
                 input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")

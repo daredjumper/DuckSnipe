@@ -8,12 +8,12 @@ import aiohttp
 from datetime import datetime
 from colorama import Fore, Style
 
-# Import config module
+
 from config import (AVAILABLE_SNIPES, AVAILABLE_FILE, 
                     MAX_CONCURRENT_REQUESTS, REQUEST_DELAY)
 from utils import log_message, save_rate_limit_alert
 
-# Track if rate limiting was detected
+
 RATE_LIMIT_DETECTED = False
 
 async def validate_username(session, username, log_name="username_check"):
@@ -23,7 +23,7 @@ async def validate_username(session, username, log_name="username_check"):
     
     try:
         async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-            # Check for rate limiting status codes
+            
             if resp.status == 429:
                 RATE_LIMIT_DETECTED = True
                 msg = f"{Fore.RED}⚠ RATE LIMITED! Received 429 status code for {username}"
@@ -96,9 +96,9 @@ def save_available_username(username):
 async def validate_usernames_concurrent(usernames, log_name="username_check"):
     """Validate multiple usernames concurrently with rate limiting"""
     global RATE_LIMIT_DETECTED
-    RATE_LIMIT_DETECTED = False  # Reset flag
+    RATE_LIMIT_DETECTED = False
     
-    # Import here to get updated values
+    
     from config import MAX_CONCURRENT_REQUESTS, REQUEST_DELAY
     
     if not usernames:
@@ -108,7 +108,7 @@ async def validate_usernames_concurrent(usernames, log_name="username_check"):
     print(f"{Fore.CYAN}Checking {len(usernames)} usernames...{Style.RESET_ALL}\n")
     log_message(log_name, f"Starting check of {len(usernames)} usernames")
     
-    # Create semaphore to limit concurrent requests
+    
     semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)
     
     async def validate_with_semaphore(session, username):
