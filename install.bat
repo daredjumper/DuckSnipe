@@ -84,6 +84,13 @@ if errorlevel 1 (
     exit /b 1
 )
 echo [OK] aiohttp installed.
+python -m pip install colorama --quiet
+if errorlevel 1 (
+    echo [ERROR] Failed to install colorama!
+    pause
+    exit /b 1
+)
+echo [OK] colorama installed.
 
 echo.
 echo ========================================
