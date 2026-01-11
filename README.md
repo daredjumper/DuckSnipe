@@ -1,20 +1,150 @@
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/18ee90a0-786f-4014-8351-c629c54fcb95" height="250px"/>
-  <br>
-  [ Open-source roblox name sniping tool. ]
-</p>
+<div align="center">
 
-<img align="center" src="https://github.com/user-attachments/assets/20f78391-2b4a-42c4-85d4-391ecbc0edcc" height="500px"/>
+# DuckSnipe
 
-# Installation
-**Make sure you have the following python packages installed: ``requests, colorama, random``**
+**Open-source Roblox username availability checker**
 
-Open the ``sniper.bat`` file or run main.py using cmd line.
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-1.0.8-orange.svg)](https://github.com/yourusername/ducksnipe)
 
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Commands](#commands)
+
+</div>
+
+---
 
 ## Features
 
-- Username Generating
-- Availability Checker
-- Password Generator
-- User & Available Snipes storer
+- **Concurrent Checking** - Fast async username validation
+- **Smart Generation** - Multiple wordlist types for username combinations
+- **Password Generator** - Automatic secure password creation
+- **Storage System** - Save accounts and available usernames
+- **Detailed Logging** - Track all checks with timestamps and execution times
+- **Custom Wordlists** - Add your own words for personalized generation
+
+---
+
+## Installation
+
+### Quick Setup
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/yourusername/ducksnipe.git
+   cd ducksnipe
+   ```
+
+2. Run the installer
+   ```bash
+   install.bat
+   ```
+
+3. Launch DuckSnipe
+   ```bash
+   start.bat
+   ```
+
+### Manual Setup
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install aiohttp
+python ducksnipe.py
+```
+
+---
+
+## Usage
+
+### Basic Commands
+
+```bash
+# Generate and check usernames
+genkey wordlist Pro
+
+# Check specific usernames
+check CoolDude123 EpicGamer456
+
+# Add custom words
+addword ninja
+
+# Generate password
+pass CoolDude123
+
+# View saved accounts
+storage
+```
+
+---
+
+## Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `genkey [type] [key]` | Generate username combinations | `genkey wordlist Pro` |
+| `check [username]` | Check username availability | `check TestUser123` |
+| `addword [word]` | Add custom word to wordlist | `addword shadow` |
+| `pass [username]` | Generate random password | `pass MyUsername` |
+| `addacc [user] [pass]` | Save account credentials | `addacc User Pass123` |
+| `storage` | View saved accounts | `storage` |
+| `clear` | Clear available snipes list | `clear` |
+| `help` | Show detailed help | `help` |
+
+### Wordlist Types
+
+- **wordlist** - Common words and terms
+- **studio** - Roblox Studio terminology
+- **minerals** - Mineral and element names
+- **custom** - Your personal wordlist
+- **great** - Premium Roblox-related words
+- **jobs** - Professions and occupations
+
+---
+
+## File Structure
+
+```
+ducksnipe/
+├── ducksnipe.py        # Main application
+├── install.bat         # Auto-installer
+├── start.bat           # Quick launcher
+├── words.txt           # Custom wordlist (auto-created)
+├── users.txt           # Saved accounts (auto-created)
+└── DuckSnipeLogs/      # Execution logs (auto-created)
+    ├── genkey_output.txt
+    ├── check_output.txt
+    └── ...
+```
+
+---
+
+## How It Works
+
+1. Generate usernames by combining your key with wordlist entries
+2. Check availability using Roblox's validation API concurrently
+3. Store available usernames and generated passwords
+4. Log all operations with timestamps and execution metrics
+
+---
+
+## Disclaimer
+
+This tool is for **educational purposes only**. Username sniping may violate Roblox Terms of Service. Use responsibly and at your own risk.
+
+---
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details
+
+---
+
+<div align="center">
+
+**Made by the community**
+
+[Report Bug](https://github.com/yourusername/ducksnipe/issues) • [Request Feature](https://github.com/yourusername/ducksnipe/issues)
+
+</div>
