@@ -2,3 +2,4 @@
 DuckSnipeLogs
 .python-version
 pyproject.toml
+__pycache__
