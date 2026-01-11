@@ -1,0 +1,4 @@
+.venv
+DuckSnipeLogs
+.python-version
+pyproject.toml
