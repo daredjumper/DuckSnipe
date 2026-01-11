@@ -96,4 +96,5 @@ Type 'help' for guide or 'cmds' for command list
             log_message("error", f"Unexpected error: {e}")
 
 if __name__ == "__main__":
+    
     main()

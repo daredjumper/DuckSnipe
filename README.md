@@ -145,6 +145,6 @@ MIT License - See [LICENSE](LICENSE) for details
 
 **Made by the community**
 
-[Report Bug](https://github.com/yourusername/ducksnipe/issues) • [Request Feature](https://github.com/yourusername/ducksnipe/issues)
+[Report Bug](https://github.com/daredjumper/ducksnipe/issues) • [Request Feature](https://github.com/daredjumper/ducksnipe/issues)
 
 </div>
