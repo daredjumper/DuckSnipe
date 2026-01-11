@@ -1,3 +1,9 @@
+.venv
+DuckSnipeLogs
+.python-version
+pyproject.toml
+__pycache__
+uv.lock
 words.txt
 venv
 DuckSnipeLogs
