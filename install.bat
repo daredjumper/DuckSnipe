@@ -195,13 +195,12 @@ echo   2. Web UI    : Type 'web' in CLI to start web interface
 echo                  Then open: http://localhost:8080
 echo.
 echo Quick Start:
-echo   1. Run: start.bat
-echo   2. Type: web
-echo   3. Open browser to: http://localhost:8080
+echo   Run: start.bat
 echo.
 echo Manual activation:
 echo   venv\Scripts\activate.bat
 echo   python ducksnipe.py
 echo.
 echo ========================================
+
 pause
