@@ -1,174 +1,255 @@
 # DuckSnipe
 
-**Open-source Roblox username availability checker with advanced features**
+Open-source Roblox username availability checker with CLI & Web Interface
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-1.0.9-orange.svg)](https://github.com/daredjumper/ducksnipe)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Commands](#commands) • [Settings](#settings)
+---
+
+## Overview
+
+DuckSnipe is a powerful tool for checking Roblox username availability. It offers both a command-line interface for power users and a modern web interface for visual interaction. Built with async operations and smart rate limiting to ensure fast, reliable results while respecting API limits.
+
+**Key Capabilities:**
+- Concurrent username checking with configurable rate limiting
+- Multiple generation methods: wordlist combinations, random letters, number patterns
+- Dual interface: CLI for speed, Web for visualization
+- Comprehensive logging and result tracking
+- Real-time statistics dashboard
+- JSON export functionality
+
+---
+
+## Quick Start
+
+### Installation
+
+**Automated Setup (Windows)**
+```bash
+git clone https://github.com/daredjumper/ducksnipe.git
+cd ducksnipe
+install.bat
+```
+
+The installer will automatically:
+- Create virtual environment
+- Install all dependencies (aiohttp, colorama, Flask)
+- Set up required folders and files
+
+**Manual Setup**
+```bash
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install aiohttp colorama flask
+```
+
+### Running
+
+**Interactive Launcher**
+```bash
+start.bat
+```
+
+Select your preferred mode:
+- [1] CLI Mode - Traditional command-line interface
+- [2] Web Interface - Browser-based GUI at localhost:8080
+- [3] Dual Mode - Run both simultaneously
+
+**Direct Launch**
+```bash
+python ducksnipe.py  # CLI
+python web_server.py  # Web interface
+```
 
 ---
 
 ## Features
 
-- **Concurrent Checking** - Fast async username validation with configurable rate limiting
-- **Smart Generation** - Multiple wordlist types for username combinations (270+ words)
-- **Random Generator** - Create random letter-based usernames with customizable length
-- **Password Generator** - Automatic secure password creation
-- **Storage System** - Save accounts and track available usernames automatically
-- **Detailed Logging** - Comprehensive logs with timestamps in dedicated folder
-- **Custom Wordlists** - Add your own words for personalized generation
-- **Color-Coded Output** - Beautiful terminal interface with colored status messages
-- **Settings Management** - Interactive configuration for API and file paths
-- **Rate Limit Detection** - Automatic detection and warnings for API throttling
-- **Persistent Settings** - Save configurations between sessions
+### Core Functionality
 
----
+**Username Generation**
+- GenKey: Combine custom keys with predefined wordlists (270+ words)
+- Letter Generator: Random letter-based usernames with customizable parameters
+- Number Generator: Pure numbers, prefix/suffix combinations, or sequential ranges
 
-## Installation
+**Checking & Validation**
+- Async concurrent checking for maximum speed
+- Configurable rate limiting to prevent API bans
+- Automatic detection of rate limit responses (429/403)
+- Color-coded status output for quick scanning
 
-### Quick Setup (Recommended)
+**Data Management**
+- Automatic saving of available usernames with timestamps
+- Account credential storage
+- Custom wordlist support
+- Comprehensive logging system
+- JSON export capability
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/daredjumper/ducksnipe.git
-   cd ducksnipe
-   ```
+### Interface Options
 
-2. Run the auto-installer
-   ```bash
-   install.bat
-   ```
+**Command-Line Interface**
+- Fast command execution
+- Full feature access via text commands
+- Ideal for automation and power users
+- Persistent settings across sessions
 
-3. Launch DuckSnipe
-   ```bash
-   start.bat
-   ```
-
-### Manual Setup
-
-```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Linux/Mac
-
-# Install dependencies
-pip install aiohttp colorama
-
-# Run application
-python ducksnipe.py
-```
+**Web Interface**
+- Modern, responsive design
+- Live statistics dashboard
+- Interactive generators with real-time feedback
+- Visual result display
+- One-click JSON export
+- Auto-refreshing stats every 5 seconds
 
 ---
 
 ## Usage
 
-### Quick Start
+### CLI Commands
 
+**Generation**
 ```bash
-# Generate and check usernames from wordlist
-genkey wordlist Pro
-
-# Generate random 5-character usernames
-letter_gen
-
-# Check specific usernames
-check CoolDude123 EpicGamer456
-
-# View all available usernames found
-available
-
-# Modify settings (rate limiting, file paths)
-settings
+genkey [type] [key]    # Generate combinations from wordlist
+letter_gen             # Interactive random letter generator
+genum                  # Interactive number generator
+check [username...]    # Check specific usernames
 ```
+
+**Data Management**
+```bash
+available              # View available usernames
+storage                # View saved accounts
+addword [word]         # Add to custom wordlist
+pass [username]        # Generate password
+addacc [user] [pass]   # Save account credentials
+clear                  # Clear in-memory results
+```
+
+**Configuration**
+```bash
+settings               # View/modify settings
+web                    # Launch web interface
+help                   # Detailed help
+cmds                   # Command list
+```
+
+### Web Interface
+
+Navigate to `http://localhost:8080` after starting the web server.
+
+**Quick Check Tab**
+Enter usernames line-by-line to check availability instantly.
+
+**Generator Tabs**
+- **GenKey**: Select wordlist type and key value
+- **Letters**: Configure length, count, and number inclusion
+- **Numbers**: Choose from pure numbers, prefix/suffix combos, or sequential ranges
+
+**Results Panel**
+View all available usernames with timestamps, refresh manually, or export to JSON.
 
 ### Example Workflow
 
 ```bash
-# Step 1: Generate usernames
-genkey wordlist Shadow
-# Generates: Shadowpro, proShadow, Shadowking, kingShadow, etc.
+# Start dual mode
+start.bat → [3]
 
-# Step 2: View available usernames
-available
-# Shows all usernames that are available
+# Generate via CLI
+=> genkey wordlist Shadow
 
-# Step 3: Generate password for available username
-pass ShadowKing
+# Monitor via Web
+# Results appear in real-time on dashboard
 
-# Step 4: Save account
-addacc ShadowKing MySecurePass123
+# Export findings
+# Click "Export JSON" in web interface
+
+# Save credentials
+=> pass ShadowKing
+=> addacc ShadowKing GeneratedPassword123
 ```
 
 ---
 
-## Commands
+## Configuration
 
-### Username Generation
+### API Settings
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `genkey [type] [key]` | Generate username combinations from wordlist | `genkey wordlist Pro` |
-| `letter_gen` | Interactive random username generator | `letter_gen` |
-| `check [username...]` | Check specific username availability | `check User1 User2` |
+Access via CLI `settings` command or Web interface.
 
-### Data Management
+**Max Concurrent Requests** (Default: 10)
+- Simultaneous API requests
+- Lower = safer, higher = faster
+- Range: 1-100
+- Recommended: 5-10 for safe operation
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `available` | View all available usernames found | `available` |
-| `storage` | View saved accounts | `storage` |
-| `addword [word]` | Add custom word to wordlist | `addword shadow` |
-| `pass [username]` | Generate random password | `pass MyUsername` |
-| `addacc [user] [pass]` | Save account credentials | `addacc User Pass123` |
+**Request Delay** (Default: 0.3s)
+- Pause between request batches
+- Higher = safer, lower = faster
+- Range: 0-10 seconds
+- Recommended: 0.3-0.5 for safe operation
 
-### Configuration
+### File Paths
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `settings` | View and modify settings | `settings` |
-| `clear` | Clear available snipes from memory | `clear` |
-| `help` | Show detailed help guide | `help` |
-| `cmds` | Show command list | `cmds` |
+All paths are configurable:
+- Log Folder: `DuckSnipeLogs`
+- Users File: `users.txt`
+- Words File: `words.txt`
+- Available File: `available_usernames.txt`
 
-### Wordlist Types
-
-- **wordlist** - 270+ common words and gaming terms
-- **studio** - Roblox Studio terminology and API references
-- **minerals** - Mineral, element, and gem names
-- **custom** - Your personal custom wordlist
-- **great** - Premium Roblox-related words
-- **jobs** - Professions and occupations
+Settings persist to `settings.json` automatically.
 
 ---
 
-## Settings
+## Wordlist Types
 
-Access the settings menu with the `settings` command to configure:
+**wordlist** - 270+ common words and gaming terms  
+**studio** - Roblox Studio terminology and API references  
+**minerals** - Mineral, element, and gem names  
+**custom** - Your personal wordlist (add via `addword`)  
+**great** - Premium Roblox-related words  
+**jobs** - Professions and occupations
 
-### API Settings
-- **Max Concurrent Requests** (Default: 10)
-  - Number of simultaneous API requests
-  - Lower values = safer, less likely to be rate limited
-  - Range: 1-100
+---
 
-- **Request Delay** (Default: 0.3 seconds)
-  - Delay between request batches
-  - Higher values = safer, slower checking
-  - Range: 0-10 seconds
+## Number Generator
 
-### File Paths
-- **Log Folder** - Where logs are saved (Default: DuckSnipeLogs)
-- **Users File** - Account storage location (Default: users.txt)
-- **Words File** - Custom wordlist location (Default: words.txt)
-- **Available File** - Available usernames log (Default: available_usernames.txt)
+Four generation modes:
 
-### Reset to Defaults
-Option to reset all settings to safe default values.
+**Pure Numbers**
+Generate random numbers with specified digit length (1-10).
+Example: 12345, 98765
+
+**Prefix + Numbers**
+Add text before numbers, validates total length.
+Example: User12345, Pro98765
+
+**Numbers + Suffix**
+Add text after numbers, validates total length.
+Example: 12345Pro, 98765Epic
+
+**Sequential Range**
+Generate consecutive numbers within range.
+Example: 10000-11000
+
+---
+
+## Web API
+
+RESTful API available at `http://localhost:8080/api`:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/stats` | GET | Current statistics |
+| `/api/available` | GET | Available usernames list |
+| `/api/check` | POST | Check usernames |
+| `/api/genkey` | POST | Generate with wordlists |
+| `/api/letter_gen` | POST | Generate letter usernames |
+| `/api/genum` | POST | Generate number usernames |
+| `/api/settings` | GET/POST | View/modify settings |
+| `/api/clear_snipes` | POST | Clear in-memory list |
+| `/api/export_available` | GET | Export as JSON |
 
 ---
 
@@ -176,154 +257,203 @@ Option to reset all settings to safe default values.
 
 ```
 ducksnipe/
-├── ducksnipe.py          # Main application entry point
-├── config.py             # Configuration and wordlists
-├── api.py                # Async API handling
-├── commands.py           # Command implementations
-├── utils.py              # Utility functions
-├── install.bat           # Windows auto-installer
-├── start.bat             # Quick launcher
-├── settings.json         # Saved settings (auto-created)
-├── words.txt             # Custom wordlist (auto-created)
-├── users.txt             # Saved accounts (auto-created)
-├── available_usernames.txt  # Available usernames log (auto-created)
-└── DuckSnipeLogs/        # Execution logs (auto-created)
-    ├── genkey_output.txt
-    ├── check_output.txt
-    ├── letter_gen_output.txt
-    ├── rate_limit_output.txt
-    ├── rate_limit_alerts.txt
-    ├── timeouts_output.txt
-    ├── connection_errors_output.txt
-    └── errors_output.txt
+├── ducksnipe.py              Main CLI application
+├── web_server.py             Web interface server
+├── config.py                 Configuration and wordlists
+├── api.py                    Async API handling
+├── commands.py               Command implementations
+├── utils.py                  Utility functions
+├── install.bat               Windows installer
+├── start.bat                 Interactive launcher
+├── templates/
+│   └── index.html           Web UI
+├── settings.json             Persisted settings
+├── words.txt                 Custom wordlist
+├── users.txt                 Saved accounts
+├── available_usernames.txt   Found usernames
+└── DuckSnipeLogs/            Operation logs
 ```
-
----
-
-## How It Works
-
-### Username Generation
-1. Combines your key with wordlist entries (e.g., "Pro" + "Shadow" = "ProShadow", "ShadowPro")
-2. Or generates random letter-based usernames with configurable length and number inclusion
-
-### Availability Checking
-1. Uses Roblox auth API to validate username availability
-2. Checks multiple usernames concurrently with rate limiting
-3. Color-coded output shows status: available (green), taken (red), inappropriate (yellow)
-
-### Data Storage
-1. Available usernames automatically saved to `available_usernames.txt` with timestamps
-2. Account credentials saved to `users.txt`
-3. All operations logged to `DuckSnipeLogs/` folder
-
-### Rate Limit Protection
-1. Configurable concurrent request limits
-2. Adjustable delays between requests
-3. Automatic detection of 429/403 status codes
-4. Warning messages with recommendations
 
 ---
 
 ## Rate Limiting
 
-DuckSnipe includes smart rate limiting to prevent API bans:
+### Default Configuration
 
-### Default Safe Settings
+Safe defaults prevent API throttling:
 - 10 concurrent requests
 - 0.3 second delay between batches
 - Automatic rate limit detection
 
 ### If Rate Limited
+
 1. Wait 5-10 minutes before retrying
-2. Use `settings` to lower Max Concurrent Requests (try 5)
-3. Use `settings` to increase Request Delay (try 0.5 or 1.0)
-4. Check logs in `DuckSnipeLogs/rate_limit_alerts.txt`
+2. Reduce concurrent requests to 5
+3. Increase delay to 0.5 or 1.0 seconds
+4. Check `DuckSnipeLogs/rate_limit_alerts.txt`
 
 ### Best Practices
-- Start with default settings
-- Only increase speed if no rate limiting occurs
-- Monitor `rate_limit_output.txt` for warnings
+
+- Begin with default settings
+- Increase speed only if no throttling occurs
+- Monitor rate limit logs regularly
+- Batch large operations into smaller groups
 - Use lower settings for mass checking (1000+ usernames)
-
----
-
-## Advanced Features
-
-### Letter Generator
-Interactive random username generator with:
-- Custom length (3-20 characters)
-- Count selection (1-50000 or 'max' for maximum possible)
-- Optional number inclusion
-- Duplicate prevention
-- Automatic availability checking
-
-Example:
-```
-letter_gen
-> Characters: 5
-> Count: max
-> Include numbers? (y/n): y
-> Generating 50000 usernames...
-```
-
-### Color-Coded Interface
-- Green: Available usernames and success messages
-- Red: Taken usernames, errors, rate limits
-- Yellow: Warnings and inappropriate usernames
-- Cyan: Information and status messages
-- Magenta: Command prompts and headers
-
-### Persistent Settings
-Settings are saved to `settings.json` and automatically loaded on startup. No need to reconfigure each time.
 
 ---
 
 ## Troubleshooting
 
-### Rate Limiting (429/403 Errors)
-**Solution:** Lower concurrent requests and add delay in settings menu
+### Web Interface
 
-### "Module has no attribute" Errors
-**Solution:** Ensure all files (config.py, api.py, commands.py, utils.py, ducksnipe.py) are updated to latest version
+**Flask Import Error**
+```bash
+pip install flask
+```
 
-### Import Errors
-**Solution:** Run `pip install aiohttp colorama` or use `install.bat`
+**Templates Not Found**
+Ensure `templates/index.html` exists in correct location.
 
-### Logs Not Saving
-**Solution:** Check write permissions for DuckSnipeLogs folder
+**Port Conflict**
+Edit `web_server.py` to change port:
+```python
+run_server(host='127.0.0.1', port=8081)
+```
+
+### CLI
+
+**Rate Limiting (429/403)**
+Lower concurrent requests and increase delay via settings menu.
+
+**Import Errors**
+```bash
+pip install aiohttp colorama flask
+```
+
+**Permission Errors**
+Check write permissions for DuckSnipeLogs folder.
+
+### Installation
+
+**Python Not Found**
+Install Python 3.8+ from python.org with "Add to PATH" enabled.
+
+**Virtual Environment Issues**
+```bash
+python -m venv venv --clear
+```
+
+---
+
+## Advanced Usage
+
+### Dual Mode Operation
+
+Running CLI and Web simultaneously provides optimal workflow:
+- Execute commands quickly via CLI
+- Monitor results visually via Web
+- Shared data between interfaces
+- Independent operation of each interface
+
+Launch via `start.bat → [3]` or manually:
+```bash
+# Terminal 1
+python web_server.py
+
+# Terminal 2
+python ducksnipe.py
+```
+
+### Custom Port Configuration
+
+Modify `web_server.py`:
+```python
+def run_server(host='127.0.0.1', port=8080):
+```
+
+Change `port` value to desired port number.
+
+### Network Access
+
+Default configuration restricts access to localhost. To enable network access:
+```python
+run_server(host='0.0.0.0', port=8080)
+```
+
+Warning: This exposes the interface to your network.
+
+---
+
+## Development
+
+### Requirements
+
+- Python 3.8+
+- aiohttp 3.8.0+
+- colorama 0.4.6+
+- Flask 2.3.0+
+
+### Setup
+
+```bash
+git clone https://github.com/daredjumper/ducksnipe.git
+cd ducksnipe
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install aiohttp colorama flask
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Implement changes
+4. Test both CLI and Web interfaces
+5. Submit pull request
 
 ---
 
 ## Disclaimer
 
-This tool is for **educational purposes only**. 
+Educational purposes only.
 
+- Uses public Roblox API for username validation
 - Username sniping may violate Roblox Terms of Service
+- Automated account creation is not supported and violates TOS
+- Respect rate limits to avoid IP restrictions
 - Use responsibly and ethically
-- Respect rate limits to avoid IP bans
-- The developers are not responsible for any misuse
-- Use at your own risk
+- Developers assume no liability for misuse
 
----
-
-## Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+Finding available usernames: Educational use  
+Automated account creation: Prohibited
 
 ---
 
 ## License
 
-MIT License - See [LICENSE](LICENSE) for details
+MIT License - See LICENSE for details
 
 ---
 
-## Credits
-
-Made by the community for the community
+## Resources
 
 [Report Bug](https://github.com/daredjumper/ducksnipe/issues) • [Request Feature](https://github.com/daredjumper/ducksnipe/issues) • [Discussions](https://github.com/daredjumper/ducksnipe/discussions)
+
+---
+
+## Changelog
+
+**Version 1.0.9**
+- Added Flask-based web interface
+- Added number generator (genum command)
+- Added interactive launcher (start.bat)
+- Added REST API endpoints
+- Added JSON export functionality
+- Added live statistics dashboard
+- Updated installer for Flask support
+- Improved error handling and logging
+- Enhanced documentation
+
+---
+
+Made by the community for the community

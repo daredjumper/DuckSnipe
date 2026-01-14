@@ -10,7 +10,7 @@ import config
 from utils import sync_custom_words, log_message, load_settings
 from commands import (add_word, generate_pass, add_account, show_storage,
                       show_commands, show_help, clear_snipes, show_available,
-                      handle_genkey, handle_check, handle_letter_gen,
+                      handle_genkey, handle_check, handle_letter_gen, handle_genum,
                       show_settings, modify_settings)
 
 
@@ -98,10 +98,31 @@ def main():
             elif cmd == "letter_gen":
                 asyncio.run(handle_letter_gen())
                 input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
+            
+            elif cmd == "genum":
+                asyncio.run(handle_genum())
+                input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
                 
             elif cmd == "check":
                 asyncio.run(handle_check(args))
                 input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
+            
+            elif cmd == "web":
+                print(f"{Fore.CYAN}╔═══════════════════════════════════════╗")
+                print(f"{Fore.CYAN}║{Fore.YELLOW}     Starting Web Interface...     {Fore.CYAN}║")
+                print(f"{Fore.CYAN}╚═══════════════════════════════════════╝{Style.RESET_ALL}")
+                print(f"\n{Fore.GREEN}Web server will start on: http://localhost:8080")
+                print(f"Press Ctrl+C to stop the server{Style.RESET_ALL}\n")
+                try:
+                    from web_server import run_server
+                    run_server()
+                except ImportError:
+                    print(f"{Fore.RED}Error: Flask not installed. Install with: pip install flask{Style.RESET_ALL}")
+                except KeyboardInterrupt:
+                    print(f"\n{Fore.YELLOW}Web server stopped.{Style.RESET_ALL}")
+                except Exception as e:
+                    print(f"{Fore.RED}Error starting web server: {e}{Style.RESET_ALL}")
+                    log_message("error", f"Web server error: {e}")
                 
             else:
                 print(f"{Fore.RED}Unknown command: '{cmd}'")

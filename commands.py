@@ -96,7 +96,7 @@ def show_available():
     
     if content is None or not content.strip():
         print(f"{Fore.YELLOW}No available usernames found yet.")
-        print(f"Run 'genkey' or 'check' commands to find available usernames.")
+        print(f"Run 'genkey', 'letter_gen', or 'genum' commands to find available usernames.")
     else:
         print(f"{Fore.CYAN}=== Available Usernames ==={Style.RESET_ALL}\n")
         print(f"{Fore.GREEN}{content}{Style.RESET_ALL}")
@@ -209,6 +209,10 @@ def show_commands():
                           Types: wordlist, studio, minerals, custom, great, jobs
 
 {Fore.YELLOW}letter_gen{Style.RESET_ALL}              - Generate random letter usernames (interactive)
+
+{Fore.YELLOW}genum{Style.RESET_ALL}                   - Generate number-based usernames (interactive)
+
+{Fore.YELLOW}web{Style.RESET_ALL}                     - Start web interface on localhost:8080
                           
 {Fore.YELLOW}check [username]{Style.RESET_ALL}        - Check if a username is available
 
@@ -263,6 +267,20 @@ def show_help():
   
   Example: letter_gen
 
+{Fore.GREEN}genum{Style.RESET_ALL}
+  Generate number-based usernames
+  Interactive prompts for digit length and count
+  Generates pure numeric or prefix/suffix patterns
+  
+  Example: genum
+
+{Fore.GREEN}web{Style.RESET_ALL}
+  Start web interface on localhost:8080
+  Access via browser for visual interface
+  Press Ctrl+C to stop the server
+  
+  Example: web
+
 {Fore.GREEN}settings{Style.RESET_ALL}
   View and modify application settings:
     - API rate limiting (concurrent requests, delays)
@@ -278,6 +296,7 @@ def show_help():
 {Fore.YELLOW}FEATURES:{Style.RESET_ALL}
 ---------
 • Concurrent username checking (fast!)
+• Web interface with live dashboard
 • Automatic logging to {config.LOG_FOLDER}/
 • Available usernames saved to {config.AVAILABLE_FILE}
 • Customizable settings
@@ -443,3 +462,137 @@ async def handle_letter_gen():
     
     elapsed = (perf_counter() - start_time) * 1000
     log_message("letter_gen", f"Command completed in {elapsed:.2f}ms")
+
+async def handle_genum():
+    """Handle genum command - generate number-based usernames"""
+    start_time = perf_counter()
+    
+    print(f"\n{Fore.CYAN}=== Number Username Generator ==={Style.RESET_ALL}\n")
+    print(f"{Fore.YELLOW}Generation Types:")
+    print(f"1. Pure numbers only (e.g., 12345)")
+    print(f"2. Numbers with prefix (e.g., User12345)")
+    print(f"3. Numbers with suffix (e.g., 12345Pro)")
+    print(f"4. Sequential numbers (e.g., 1000-2000){Style.RESET_ALL}\n")
+    
+    while True:
+        gen_type = input(f"{Fore.CYAN}Select generation type (1-4): {Style.RESET_ALL}").strip()
+        if gen_type in ['1', '2', '3', '4']:
+            break
+        else:
+            print(f"{Fore.RED}Error: Please enter 1, 2, 3, or 4!")
+    
+    prefix = ""
+    suffix = ""
+    
+    if gen_type == '2':
+        prefix = input(f"{Fore.CYAN}Enter prefix text: {Style.RESET_ALL}").strip()
+        if not prefix:
+            print(f"{Fore.RED}Error: Prefix cannot be empty!")
+            return
+    elif gen_type == '3':
+        suffix = input(f"{Fore.CYAN}Enter suffix text: {Style.RESET_ALL}").strip()
+        if not suffix:
+            print(f"{Fore.RED}Error: Suffix cannot be empty!")
+            return
+    
+    if gen_type == '4':
+        # Sequential generation
+        while True:
+            try:
+                start_num = int(input(f"{Fore.YELLOW}Enter starting number (0-999999999): {Style.RESET_ALL}").strip())
+                if 0 <= start_num <= 999999999:
+                    break
+                else:
+                    print(f"{Fore.RED}Error: Number must be between 0 and 999999999!")
+            except ValueError:
+                print(f"{Fore.RED}Error: Please enter a valid number!")
+        
+        while True:
+            try:
+                end_num = int(input(f"{Fore.YELLOW}Enter ending number ({start_num}-999999999): {Style.RESET_ALL}").strip())
+                if start_num <= end_num <= 999999999:
+                    break
+                else:
+                    print(f"{Fore.RED}Error: Ending number must be >= {start_num} and <= 999999999!")
+            except ValueError:
+                print(f"{Fore.RED}Error: Please enter a valid number!")
+        
+        count = end_num - start_num + 1
+        if count > 50000:
+            print(f"{Fore.YELLOW}Warning: Range contains {count} numbers. Limiting to first 50000.")
+            count = 50000
+        
+        usernames = [str(num) for num in range(start_num, start_num + count)]
+        
+    else:
+        # Random generation
+        while True:
+            try:
+                digits = int(input(f"{Fore.YELLOW}Number of digits (1-10): {Style.RESET_ALL}").strip())
+                if 1 <= digits <= 10:
+                    break
+                else:
+                    print(f"{Fore.RED}Error: Digits must be between 1 and 10!")
+            except ValueError:
+                print(f"{Fore.RED}Error: Please enter a valid number!")
+        
+        # Calculate max length considering prefix/suffix
+        max_username_length = 20
+        prefix_suffix_length = len(prefix) + len(suffix)
+        
+        if prefix_suffix_length + digits > max_username_length:
+            print(f"{Fore.RED}Error: Total length ({prefix_suffix_length + digits}) exceeds Roblox's 20 character limit!")
+            return
+        
+        while True:
+            try:
+                count_input = input(f"{Fore.YELLOW}How many usernames to generate? (1-50000 or 'max'): {Style.RESET_ALL}").strip().lower()
+                
+                if count_input == 'max' or count_input == 'maximum':
+                    max_combinations = 10 ** digits
+                    count = min(max_combinations, 50000)
+                    print(f"{Fore.CYAN}Generating maximum: {count} usernames")
+                    break
+                else:
+                    count = int(count_input)
+                    if 1 <= count <= 50000:
+                        break
+                    else:
+                        print(f"{Fore.RED}Error: Count must be between 1 and 50000!")
+            except ValueError:
+                print(f"{Fore.RED}Error: Please enter a valid number or 'max'!")
+        
+        print(f"\n{Fore.CYAN}Generating {count} number-based usernames...")
+        
+        # Generate random numbers
+        usernames = set()
+        max_attempts = count * 3
+        attempts = 0
+        
+        min_num = 10 ** (digits - 1) if digits > 1 else 0
+        max_num = (10 ** digits) - 1
+        
+        while len(usernames) < count and attempts < max_attempts:
+            num = random.randint(min_num, max_num)
+            username = f"{prefix}{num}{suffix}"
+            usernames.add(username)
+            attempts += 1
+        
+        usernames = list(usernames)
+        
+        if len(usernames) < count:
+            print(f"{Fore.YELLOW}Note: Generated {len(usernames)} unique usernames (requested {count})")
+    
+    msg = f"Generated {len(usernames)} number-based usernames"
+    if prefix:
+        msg += f" with prefix '{prefix}'"
+    if suffix:
+        msg += f" with suffix '{suffix}'"
+    
+    print(f"{Fore.CYAN}{msg}")
+    log_message("genum", msg)
+    
+    await validate_usernames_concurrent(usernames, "genum")
+    
+    elapsed = (perf_counter() - start_time) * 1000
+    log_message("genum", f"Command completed in {elapsed:.2f}ms")
